@@ -1,6 +1,3 @@
-Analyse des joueurs de football 2023/2024
-Projet
-
 Analyser les performances des joueurs dans les 5 meilleures ligues de football (saison 2023/2024).
 
 Objectifs
