@@ -1,0 +1,28 @@
+st.markdown("---")
+st.header("Visualisations générales")
+
+Nombre de joueurs par position et par nation
+st.subheader("Visualisation générale des données")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("**Nombre de joueurs par position (toutes ligues)**")
+    counts_pos = df["Pos"].value_counts().sort_values(ascending=False)
+    fig3, ax3 = plt.subplots(figsize=(6, 4))
+    ax3.bar(counts_pos.index, counts_pos.values, color="#4C78A8")
+    ax3.set_xlabel("Position")
+    ax3.set_ylabel("Nombre de joueurs")
+    plt.xticks(rotation=0)
+    st.pyplot(fig3)
+
+with col2:
+    st.markdown("**Nombre de joueurs par nation (toutes ligues)**")
+    top_n_nations = st.slider("Afficher les N premières nations", min_value=5, max_value=30, value=15, step=1)
+    counts_nat = df["Nation"].value_counts().head(top_n_nations)
+    fig4, ax4 = plt.subplots(figsize=(6, 4))
+    ax4.bar(counts_nat.index, counts_nat.values, color="#F58518")
+    ax4.set_xlabel("Nation")
+    ax4.set_ylabel("Nombre de joueurs")
+    plt.xticks(rotation=45, ha="right")
+    st.pyplot(fig4)
