@@ -1,5 +1,5 @@
 st.markdown("---")
-st.header("Ta partie — Visualisations générales")
+st.header("Visualisations générales")
 
 Nombre de joueurs par position et par nation
 st.subheader("Visualisation générale des données")
