@@ -1,54 +1,52 @@
-import streamlit as st 
+import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Dashboard Interactif Pour le foot", layout="wide")
-st.title(" Analyse des performances des joueurs")
+st.set_page_config(page_title="Dashboard Foot", layout="wide")
+st.title("Analyse des performances des joueurs")
 
 # Charger les données
 df = pd.read_csv("data/clean-top5-players.csv")
 
+# Filtres généraux
+league = st.sidebar.selectbox("Choisir une ligue :", sorted(df["Comp"].unique()))
+team = st.sidebar.selectbox("Choisir une équipe :", sorted(df[df["Comp"] == league]["Squad"].unique()))
+pos = st.sidebar.selectbox("Choisir une position :", ["Toutes"] + sorted(df["Pos"].unique()))
 
-# Filtres interactifs
-# Choix de la ligue
-leagues = df["Comp"].unique()
-league_choice = st.sidebar.selectbox("Choisir une ligue :", sorted(leagues))
+# Filtrer les données
+data = df[(df["Comp"] == league) & (df["Squad"] == team)]
+if pos != "Toutes":
+    data = data[data["Pos"] == pos]
 
-# Choix de l'équipe en fonction de la ligue sélectionnée
-teams = df[df["Comp"] == league_choice]["Squad"].unique()
-team_choice = st.sidebar.selectbox("Choisir une équipe :", sorted(teams))
-
-#Choix de la position (optionnel)
-positions = df["Pos"].unique()
-pos_choice = st.sidebar.selectbox("Choisir une position :", ["Toutes"] + sorted(positions))
-
-#Filtrer par ligue + équipe + position
-filtered_df = df[(df["Comp"] == league_choice) & (df["Squad"] == team_choice)]
-if pos_choice != "Toutes":
-    filtered_df = filtered_df[filtered_df["Pos"] == pos_choice]
-
-#Barre de recherche joueur avec suggestions
-player_list = filtered_df["Player"].dropna().unique()
-player_choice = st.selectbox("Rechercher un joueur :", ["Tous"] + sorted(player_list))
-
-if player_choice != "Tous":
-    player_df = filtered_df[filtered_df["Player"] == player_choice]
-else:
-    player_df = filtered_df
-
-
-# Graphique : buts des joueurs
-st.subheader(f"Nombre de buts - {team_choice} ({league_choice}) - {pos_choice}")
+# Premier graphique : buts par joueur
+st.subheader(f"Buts - {team} ({league}) - {pos}")
 
 fig, ax = plt.subplots(figsize=(10, 5))
-ax.bar(player_df["Player"], player_df["Gls"], color="skyblue")
-ax.set_xlabel("Joueurs")
-ax.set_ylabel("Buts marqués")
-ax.set_title(f"Buts marqués ({team_choice} - {league_choice})")
+ax.bar(data["Player"], data["Gls"], color="skyblue")
 plt.xticks(rotation=45, ha="right")
-
 st.pyplot(fig)
 
-# Tableau des performances
-st.subheader("Performances détaillées")
-st.dataframe(player_df[["Player", "Pos", "MP", "Min", "Gls", "Ast"]])
+# Tableau
+st.dataframe(data[["Player", "Pos", "MP", "Min", "Gls", "Ast"]])
+
+# Deuxième graphique : top joueurs ligue/position
+st.subheader("Top joueurs de la ligue")
+
+nb = st.sidebar.selectbox("Nombre de joueurs :", [5, 10, 20, 30])
+stat_options = {"Buts (Gls)": "Gls", "Passes (Ast)": "Ast", "Minutes (Min)": "Min"}#stat_options = {"Buts (Gls)": "Gls", "Passes (Ast)": "Ast", "Minutes (Min)": "Min"} rajout de Dine
+stat_label = st.sidebar.selectbox("Statistique :", list(stat_options.keys()))
+stat = stat_options[stat_label]
+
+# Filtrer par ligue/position
+top_data = df[df["Comp"] == league]
+if pos != "Toutes":
+    top_data = top_data[top_data["Pos"] == pos]
+
+# Trier et sélectionner
+top_players = top_data.sort_values(by=stat, ascending=False).head(nb)
+
+fig2, ax2 = plt.subplots(figsize=(10, 5))
+ax2.bar(top_players["Player"], top_players[stat], color="orange")
+ax2.set_title(f"Top {nb} joueurs ({league}) - {pos}")
+plt.xticks(rotation=45, ha="right")
+st.pyplot(fig2)
